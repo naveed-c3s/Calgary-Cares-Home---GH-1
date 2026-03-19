@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { motion } from "motion/react";
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Heart, 
   Home, 
@@ -15,7 +17,11 @@ import {
   Clock, 
   Users, 
   Handshake,
-  ChevronRight
+  ChevronRight,
+  Star,
+  Send,
+  CheckCircle,
+  X
 } from "lucide-react";
 
 const services = [
@@ -66,9 +72,52 @@ const stats = [
   { label: "Active Partners", value: "40+", icon: Handshake }
 ];
 
+const testimonials = [
+  {
+    quote: "Calgary Cares has been a blessing for our family. The nursing care is top-notch and the staff is incredibly compassionate.",
+    author: "Sarah J.",
+    role: "Family Member",
+    stars: 5
+  },
+  {
+    quote: "Professional, reliable, and truly caring. They helped my father recover after his surgery with such dignity.",
+    author: "Michael R.",
+    role: "Client",
+    stars: 5
+  },
+  {
+    quote: "The best home care service in Calgary. Their attention to detail and personalized care plans are unmatched.",
+    author: "Linda M.",
+    role: "Family Member",
+    stars: 5
+  }
+];
+
 export default function App() {
+  const [isModalOpen, setIsModalOpen] = useState<"privacy" | "terms" | null>(null);
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success">("idle");
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus("submitting");
+    // Simulate form submission
+    setTimeout(() => {
+      setFormStatus("success");
+      setTimeout(() => setFormStatus("idle"), 5000);
+    }, 1500);
+  };
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(null);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-white font-sans text-slate-900 scroll-smooth">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,10 +129,10 @@ export default function App() {
             <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
               <a href="#services" className="hover:text-blue-600 transition-colors">Services</a>
               <a href="#about" className="hover:text-blue-600 transition-colors">About Us</a>
-              <a href="#stats" className="hover:text-blue-600 transition-colors">Impact</a>
-              <a href="tel:+14034015122" className="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-200 flex items-center gap-2">
+              <a href="#testimonials" className="hover:text-blue-600 transition-colors">Testimonials</a>
+              <a href="#contact" className="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-200 flex items-center gap-2">
                 <Phone size={16} />
-                Call Now
+                Contact Us
               </a>
             </div>
           </div>
@@ -111,13 +160,13 @@ export default function App() {
                 We are dedicated to supporting your comfortable living in Calgary.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 group">
+                <a href="#contact" className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 group">
                   Book Free Consultation
                   <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button className="px-8 py-4 bg-white border-2 border-slate-200 text-slate-700 rounded-2xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all">
+                </a>
+                <a href="#services" className="px-8 py-4 bg-white border-2 border-slate-200 text-slate-700 rounded-2xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all text-center">
                   Our Services
-                </button>
+                </a>
               </div>
             </motion.div>
           </div>
@@ -236,6 +285,165 @@ export default function App() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-32 bg-slate-900 text-white overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl font-bold mb-6 tracking-tight">What Our Clients Say</h2>
+            <p className="text-lg text-slate-400">
+              Real stories from families we've had the privilege to serve in the Calgary community.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((t, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-white/5 backdrop-blur-sm p-8 rounded-3xl border border-white/10"
+              >
+                <div className="flex gap-1 mb-6">
+                  {[...Array(t.stars)].map((_, i) => (
+                    <Star key={i} size={16} className="fill-blue-400 text-blue-400" />
+                  ))}
+                </div>
+                <p className="text-lg italic text-slate-300 mb-8 leading-relaxed">
+                  "{t.quote}"
+                </p>
+                <div>
+                  <div className="font-bold text-white">{t.author}</div>
+                  <div className="text-sm text-slate-500">{t.role}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-600 rounded-full blur-[120px]" />
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-32 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-blue-600 rounded-[3rem] overflow-hidden shadow-2xl shadow-blue-200 flex flex-col lg:flex-row">
+            <div className="lg:w-1/2 p-12 lg:p-20 text-white">
+              <h2 className="text-4xl font-bold mb-8 tracking-tight">Ready to Start Your Care Journey?</h2>
+              <p className="text-blue-100 text-lg mb-12 leading-relaxed">
+                Contact us today for a free, no-obligation consultation. We'll discuss your needs and create a personalized care plan that works for you.
+              </p>
+              
+              <div className="space-y-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <Phone size={24} />
+                  </div>
+                  <div>
+                    <div className="text-blue-200 text-sm uppercase tracking-widest font-bold">Call Us</div>
+                    <div className="text-xl font-bold">+1 (403) 401-5122</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <Mail size={24} />
+                  </div>
+                  <div>
+                    <div className="text-blue-200 text-sm uppercase tracking-widest font-bold">Email Us</div>
+                    <div className="text-xl font-bold">info@calgarycares.ca</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <MapPin size={24} />
+                  </div>
+                  <div>
+                    <div className="text-blue-200 text-sm uppercase tracking-widest font-bold">Visit Us</div>
+                    <div className="text-xl font-bold">Calgary, Alberta</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:w-1/2 bg-white p-12 lg:p-20">
+              {formStatus === "success" ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="h-full flex flex-col items-center justify-center text-center space-y-6"
+                >
+                  <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                    <CheckCircle size={48} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900">Message Sent!</h3>
+                  <p className="text-slate-600">
+                    Thank you for reaching out. A member of our team will contact you shortly.
+                  </p>
+                  <button 
+                    onClick={() => setFormStatus("idle")}
+                    className="text-blue-600 font-bold hover:underline"
+                  >
+                    Send another message
+                  </button>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleContactSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
+                      <input 
+                        required
+                        type="text" 
+                        placeholder="John Doe"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
+                      <input 
+                        required
+                        type="email" 
+                        placeholder="john@example.com"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Service Interested In</label>
+                    <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all appearance-none">
+                      <option>Nursing Care</option>
+                      <option>Light Homemaking</option>
+                      <option>Personal Care & Respite</option>
+                      <option>Specialty Care</option>
+                      <option>Other / General Inquiry</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Your Message</label>
+                    <textarea 
+                      required
+                      rows={4}
+                      placeholder="How can we help you?"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all resize-none"
+                    ></textarea>
+                  </div>
+                  <button 
+                    disabled={formStatus === "submitting"}
+                    className="w-full py-5 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 disabled:opacity-70"
+                  >
+                    {formStatus === "submitting" ? "Sending..." : "Send Message"}
+                    <Send size={20} />
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -250,9 +458,9 @@ export default function App() {
                 Improving lives, one client at a time.
               </p>
               <div className="flex gap-4">
-                <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer">
+                <a href="#" className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer">
                   <Users size={18} />
-                </div>
+                </a>
               </div>
             </div>
             
@@ -279,8 +487,8 @@ export default function App() {
               <ul className="space-y-4 text-sm text-slate-600">
                 <li><a href="#services" className="hover:text-blue-600">Our Services</a></li>
                 <li><a href="#about" className="hover:text-blue-600">About Us</a></li>
-                <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-blue-600">Terms of Service</a></li>
+                <li><button onClick={() => setIsModalOpen("privacy")} className="hover:text-blue-600">Privacy Policy</button></li>
+                <li><button onClick={() => setIsModalOpen("terms")} className="hover:text-blue-600">Terms of Service</button></li>
               </ul>
             </div>
           </div>
@@ -290,6 +498,72 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Legal Modals */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl max-h-[80vh] bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-2xl font-bold text-slate-900">
+                  {isModalOpen === "privacy" ? "Privacy Policy" : "Terms of Service"}
+                </h3>
+                <button 
+                  onClick={() => setIsModalOpen(null)}
+                  className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto text-slate-600 leading-relaxed space-y-6">
+                {isModalOpen === "privacy" ? (
+                  <>
+                    <p className="font-bold text-slate-900">Last Updated: March 2026</p>
+                    <p>At Calgary Cares, your privacy is our priority. This policy outlines how we collect, use, and protect your personal information.</p>
+                    <h4 className="font-bold text-slate-900">1. Information Collection</h4>
+                    <p>We collect information you provide directly to us through our contact forms, including name, email, and health-related inquiries to provide tailored care services.</p>
+                    <h4 className="font-bold text-slate-900">2. Use of Information</h4>
+                    <p>Your data is used solely for service delivery, communication, and improving our care standards. We never sell your personal data to third parties.</p>
+                    <h4 className="font-bold text-slate-900">3. Data Security</h4>
+                    <p>We implement industry-standard security measures to protect your sensitive health information and personal details.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-bold text-slate-900">Last Updated: March 2026</p>
+                    <p>By accessing our services, you agree to the following terms and conditions.</p>
+                    <h4 className="font-bold text-slate-900">1. Service Agreement</h4>
+                    <p>Calgary Cares provides home care services based on agreed-upon care plans. We reserve the right to modify services based on clinical assessments.</p>
+                    <h4 className="font-bold text-slate-900">2. Client Responsibilities</h4>
+                    <p>Clients are responsible for providing accurate health information and maintaining a safe environment for our care providers.</p>
+                    <h4 className="font-bold text-slate-900">3. Liability</h4>
+                    <p>While we strive for excellence, Calgary Cares is not liable for outcomes beyond our reasonable control or resulting from undisclosed medical conditions.</p>
+                  </>
+                )}
+              </div>
+              <div className="p-8 border-t border-slate-100 bg-slate-50 text-right">
+                <button 
+                  onClick={() => setIsModalOpen(null)}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all"
+                >
+                  I Understand
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
